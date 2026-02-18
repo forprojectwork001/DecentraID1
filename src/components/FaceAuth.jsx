@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
 
 export default function FaceAuth() {
-  const API = "https://decentraid-10.onrender.com/";
+  const API = "https://decentraid-10.onrender.com";
 
   const videoRef = useRef(null);
   const [name, setName] = useState("");
