@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
 
 export default function FaceAuth() {
-  const API = "https://decentraid-7.onrender.com";
+  const API = "https://decentraid-8.onrender.com";
 
   const videoRef = useRef(null);
   const [name, setName] = useState("");
@@ -108,7 +108,7 @@ export default function FaceAuth() {
   };
 
   return (
-    <div style={{ textAlign: "center", padding: 20 }}>
+    <div style={{ textAlign: "center", padding: 20,backgroundColor:"orange" }}>
       <h2>Face Register & Login</h2>
 
       <video
