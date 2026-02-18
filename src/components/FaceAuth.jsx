@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
 
 export default function FaceAuth() {
-  const API = "https://decentraid-8.onrender.com";
+  const API = "https://decentraid-9.onrender.com";
 
   const videoRef = useRef(null);
   const [name, setName] = useState("");
@@ -132,7 +132,7 @@ export default function FaceAuth() {
 
       <br /><br />
 
-      <button onClick={register} style={{backgroundColor:"orange"}} disabled={!loaded || !cameraReady}>
+      <button onClick={register} style={{backgroundColor:"purple"}} disabled={!loaded || !cameraReady}>
         Register
       </button>
 
