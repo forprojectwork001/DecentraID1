@@ -132,7 +132,7 @@ export default function FaceAuth() {
 
       <br /><br />
 
-      <button onClick={register} style={{backgroundColor:"purple"}} disabled={!loaded || !cameraReady}>
+      <button onClick={register} style={{backgroundColor:"white"}} disabled={!loaded || !cameraReady}>
         Register
       </button>
 
