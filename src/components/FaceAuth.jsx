@@ -4,7 +4,7 @@ import * as faceapi from "face-api.js";
 
 
 export default function FaceAuth() {
-const API = import.meta.env.VITE_API_URL;
+const API = "https://face-auth-backend.onrender.com";
 
   const videoRef = useRef();
   const [name, setName] = useState("");
