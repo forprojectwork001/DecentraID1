@@ -1,41 +1,78 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
 
-
-
 export default function FaceAuth() {
-const API = "https://face-auth-backend.onrender.com";
+  const API = "https://face-auth-backend.onrender.com";
 
-  const videoRef = useRef();
+  const videoRef = useRef(null);
   const [name, setName] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
 
+  // Load models
   useEffect(() => {
     const loadModels = async () => {
-      const MODEL_URL = "/models";
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-      startVideo();
-      setLoaded(true);
+      try {
+        const MODEL_URL = "/models";
+
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+        await startVideo();
+        setLoaded(true);
+      } catch (err) {
+        console.error("Model loading error:", err);
+        alert("Error loading face models");
+      }
     };
+
     loadModels();
   }, []);
 
-  const startVideo = () => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        videoRef.current.srcObject = stream;
+  // Start camera
+  const startVideo = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480 }
       });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+
+      setCameraReady(true);
+    } catch (err) {
+      console.error("Camera error:", err);
+      alert("Camera access denied");
+    }
   };
 
-  const register = async () => {
+  // Detect face function (used by register & login)
+  const detectFace = async () => {
+    if (!videoRef.current) return null;
+
     const detection = await faceapi
-      .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+      .detectSingleFace(videoRef.current)
       .withFaceLandmarks()
       .withFaceDescriptor();
 
-    if (!detection) return alert("Face not detected");
+    return detection;
+  };
+
+  // Register
+  const register = async () => {
+    if (!name) {
+      alert("Enter your name");
+      return;
+    }
+
+    const detection = await detectFace();
+
+    if (!detection) {
+      alert("Face not detected. Move closer & ensure good lighting.");
+      return;
+    }
 
     await fetch(`${API}/register`, {
       method: "POST",
@@ -49,13 +86,14 @@ const API = "https://face-auth-backend.onrender.com";
     alert("Face Registered Successfully");
   };
 
+  // Login
   const login = async () => {
-    const detection = await faceapi
-      .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceDescriptor();
+    const detection = await detectFace();
 
-    if (!detection) return alert("Face not detected");
+    if (!detection) {
+      alert("Face not detected. Move closer & ensure good lighting.");
+      return;
+    }
 
     const res = await fetch(`${API}/login`, {
       method: "POST",
@@ -73,20 +111,34 @@ const API = "https://face-auth-backend.onrender.com";
     <div style={{ textAlign: "center", padding: 20 }}>
       <h2>Face Register & Login</h2>
 
-      <video ref={videoRef} autoPlay width="400" height="300" />
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        width="400"
+        height="300"
+        style={{ borderRadius: "10px", border: "2px solid #333" }}
+      />
 
-      <br />
+      <br /><br />
 
       <input
         placeholder="Enter Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        style={{ padding: 8 }}
       />
 
       <br /><br />
 
-      <button onClick={register} disabled={!loaded}>Register</button>
-      <button onClick={login} disabled={!loaded}>Login</button>
+      <button onClick={register} disabled={!loaded || !cameraReady}>
+        Register
+      </button>
+
+      <button onClick={login} disabled={!loaded || !cameraReady}>
+        Login
+      </button>
     </div>
   );
 }
